@@ -48,7 +48,7 @@ export default class BotMessage {
       .catch((error) => {
         console.error(`Telegraf error`, error);
       });
-    console.log(supportMsg);
+    //console.log(supportMsg);
   }
 
   public async message(
@@ -57,7 +57,7 @@ export default class BotMessage {
   ): Promise<void> {
     try {
       const md = telegramifyMarkdown(msg, "escape");
-      console.log("Markdown", { msg, md });
+      //console.log("Markdown", { msg, md });
       await this.bot.telegram.sendMessage(this.id, md, {
         parse_mode: "MarkdownV2",
       });
@@ -80,11 +80,11 @@ export default class BotMessage {
       .catch((error) => {
         console.error(`Telegraf error`, error);
       });
-    console.log(supportMsg);
+    //console.log(supportMsg);
     if (await getVoice(this.id)) {
-      console.log("Sending voice", this.id, msg);
+      //console.log("Sending voice", this.id, msg);
       const voice = await textToVoice(msg, this.id, this.language);
-      console.log("Voice", voice);
+      //console.log("Voice", voice);
       if (voice === undefined) {
         console.error("Voice is undefined");
         return;
@@ -115,14 +115,14 @@ export default class BotMessage {
       .catch((error) => {
         console.error(`Telegraf error`, error);
       });
-    console.log(supportMsg);
+    //console.log(supportMsg);
   }
 
   public async support(msg: string): Promise<void> {
     await this.bot.telegram.sendMessage(this.supportId, msg).catch((error) => {
       console.error(`Telegraf error`, error);
     });
-    console.log("Support msg", msg);
+    //console.log("Support msg", msg);
   }
 
   public async image(image: string, params: any): Promise<void> {
