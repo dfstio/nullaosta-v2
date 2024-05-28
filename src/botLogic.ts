@@ -78,12 +78,44 @@ export default class BotLogic {
         .catch((error) => {
           console.error("Telegraf error", error);
         });
-      console.log(supportMsg);
+      //console.log(supportMsg);
     }
+  }
+
+  private async newUser(params: {
+    chatIdString: string;
+    body: any;
+    username: string;
+  }) {
+    const { chatIdString, body, username } = params;
+    const firstSeen = Date.now();
+    const user: UserData = <UserData>{
+      id: chatIdString,
+      username,
+      message_id: body?.message?.message_id?.toString(),
+      language_code: body?.message?.from?.language_code
+        ? body.message.from.language_code
+        : "en",
+      voice: false,
+      user: body?.message?.chat ?? body?.message?.from,
+      first_name:
+        body?.message?.from?.first_name ?? body?.message?.chat?.first_name,
+      last_name:
+        body?.message?.from?.last_name ?? body?.message?.chat?.last_name,
+      is_bot: body?.message?.from?.is_bot ?? false,
+      isWhitelisted: false,
+      isPaid: false,
+      firstSeen,
+      firstSeenDate: new Date(firstSeen).toISOString(),
+      lastSeen: firstSeen,
+      lastSeenDate: new Date(firstSeen).toISOString(),
+    };
+    this.users.create(user);
   }
 
   public async handleMessage(body: any): Promise<void> {
     console.log("handleMessage", body);
+
     if (body.update?.pre_checkout_query) {
       console.log("pre_checkout_query", body);
       await this.bot.telegram
@@ -158,7 +190,7 @@ export default class BotLogic {
 
       return;
     }
-    console.log("Message:", body.message);
+    //console.log("Message:", body.message);
 
     const forwarded = await this.bot.telegram.forwardMessage(
       process.env.SUPPORT_CHAT!,
@@ -194,14 +226,10 @@ export default class BotLogic {
       });
 
     let currState = await this.users.getItem(chatIdString);
+    if (currState === undefined)
+      await this.newUser({ chatIdString, body, username });
     let current_message_id = currState && currState.message_id;
     if (!current_message_id) current_message_id = "";
-    console.log(
-      "current_message_id",
-      current_message_id,
-      "new message id",
-      body.message.message_id.toString()
-    );
     if (current_message_id.toString() === body.message.message_id.toString()) {
       console.log("Already answered");
       return;
@@ -212,17 +240,6 @@ export default class BotLogic {
       LANGUAGE = body.message.from.language_code;
     else LANGUAGE = await this.users.getCurrentLanguage(chatIdString);
     const T = getT(LANGUAGE);
-
-    if (
-      command == "new" ||
-      command == '"new"' ||
-      command == "\\new" ||
-      command == "/new"
-    ) {
-      //await this.users.resetAnswer(chatIdString);
-      await this.message(T("createNFT"));
-      return;
-    }
 
     if (
       command == "voice" ||
@@ -258,12 +275,6 @@ export default class BotLogic {
           auth: CHATGPTPLUGINAUTH,
         })
       );
-      return;
-    }
-
-    if (command == "auth" || body.message.text == "/auth") {
-      await this.message(generateJWT(chatIdString), false);
-      await this.message(T("authorizationCode"));
       return;
     }
 
@@ -400,26 +411,20 @@ export default class BotLogic {
           body.message.chat,
           body.message.from.language_code
         );
-        const user: UserData = <UserData>{
-          id: chatIdString,
-          username,
-          message_id: body.message.message_id.toString(),
-          message: "",
-          user: body.message.chat,
-          language_code: body.message.from.language_code
-            ? body.message.from.language_code
-            : "en",
-        };
-        this.users.create(user);
+        await this.newUser({ chatIdString, body, username });
 
         await this.message(T("welcomeWords"));
         await this.bot.telegram
           .sendMessage(
             process.env.SUPPORT_CHAT!,
             "New user:\n" +
-              JSON.stringify(body.message.chat, null, "\n") +
+              JSON.stringify(
+                body?.message?.chat ?? body?.message?.from ?? {},
+                null,
+                "\n"
+              ) +
               "language: " +
-              body.message.from.language_code
+              body?.message?.from?.language_code
               ? body.message.from.language_code
               : "en"
           )
@@ -427,34 +432,14 @@ export default class BotLogic {
             console.error("Telegraf error", error);
           });
       } else {
-        if (userInput.substring(0, 6) === "/start" && userInput.length > 6) {
-          console.log("Deep link ", userInput);
-          if (userInput.substring(7) == "auth") {
-            await this.message(generateJWT(chatIdString), false);
-            await this.message(T("authorizationCode"));
-          } else {
-            await callLambda(
-              "deployipfs",
-              JSON.stringify({
-                id: chatIdString,
-                command: userInput.substring(7),
-                creator: username ? username : "",
-                language: LANGUAGE,
-              })
-            );
-          }
-          return;
-        } else {
-          await callLambda(
-            "ask",
-            JSON.stringify({
-              id: chatIdString,
-              username:
-                currState && currState.username ? currState.username : "",
-              auth: CHATGPTPLUGINAUTH,
-            })
-          );
-        }
+        await callLambda(
+          "ask",
+          JSON.stringify({
+            id: chatIdString,
+            username: currState && currState.username ? currState.username : "",
+            auth: CHATGPTPLUGINAUTH,
+          })
+        );
       }
     }
   }

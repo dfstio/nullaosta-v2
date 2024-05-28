@@ -4,7 +4,7 @@ import BotLogic from "./src/botLogic";
 const send: Handler = async (
   event: any,
   context: Context,
-  callback: Callback,
+  callback: Callback
 ) => {
   try {
     //console.log("event", event);
@@ -18,7 +18,7 @@ const send: Handler = async (
       body: "ok",
     });
   } catch (error) {
-    console.error("catch", (<any>error).toString());
+    console.error("bot send catch", (<any>error).toString());
     callback(null, {
       statusCode: 200,
       body: "ok",

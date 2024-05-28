@@ -96,7 +96,7 @@ export default class ChatGPTMessage {
 
     try {
       const messages = await history.build(chatcontext);
-      console.log("ChatGPT messages", messages);
+      //console.log("ChatGPT messages", messages);
 
       let needsReply = true;
       let count = 0;
@@ -114,7 +114,7 @@ export default class ChatGPTMessage {
           tools: this.functions,
           user: id,
         });
-        console.log("ChatGPT full log", completion);
+        //console.log("ChatGPT full log", completion);
 
         if (completion.usage !== undefined && completion.usage !== null)
           await users.updateUsage(id, completion.usage as AIUsage);
@@ -215,7 +215,10 @@ export default class ChatGPTMessage {
           messages,
           user: id,
         });
-        console.log("ChatGPT", completion.choices[0].message?.content);
+        console.log(
+          "ChatGPT image prompt",
+          completion.choices[0].message?.content
+        );
         if (
           completion?.choices[0]?.message?.content !== undefined &&
           completion?.choices[0]?.message?.content !== null
@@ -253,8 +256,8 @@ export default class ChatGPTMessage {
         console.error(err);
       }
     }
-    console.log("Image prompt:", prompt);
-    console.log("Image full prompt:", fullPrompt);
+    //console.log("Image prompt:", prompt);
+    //console.log("Image full prompt:", fullPrompt);
     let imageUrl = "";
 
     try {
@@ -268,7 +271,7 @@ export default class ChatGPTMessage {
       const image = await this.api.images.generate(imageParams);
       if (image?.data[0]?.url !== undefined) imageUrl = image.data[0].url;
       await users.updateImageUsage(id);
-      console.log("Image result", imageUrl, image.data);
+      //console.log("Image result", imageUrl, image.data);
     } catch (error: any) {
       console.error("createImage error", error);
       if (

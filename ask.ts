@@ -26,7 +26,7 @@ const chatgpt: Handler = async (
   try {
     //console.log("event", event);
     //const body = JSON.parse(event.body);
-    console.log("ChatGPT ask request:", event);
+    //console.log("ChatGPT ask request:", event);
     let result: ImageGPT = <ImageGPT>{
       image: "",
       answerType: "text",
@@ -58,7 +58,7 @@ const chatgpt: Handler = async (
       if (result.answerType === "image")
         console.error("Image is not supported in this version");
 
-      console.log("ChatGPT result:", result);
+      //console.log("ChatGPT result:", result);
       await sleep(1000);
     }
 
@@ -76,7 +76,7 @@ const image: Handler = async (
 ) => {
   try {
     //console.log("event", event);
-    console.log("ChatGPT ask request:", event);
+    //console.log("ChatGPT ask request:", event);
     let result: ImageGPT = <ImageGPT>{
       image: "",
       answerType: "text",
@@ -99,7 +99,7 @@ const image: Handler = async (
           event.ai === "true" ? true : false
         );
       }
-      console.log("Image result", result);
+      //console.log("Image result", result);
       if (event.id && result.image !== "") {
         await initLanguages();
         const language = await getLanguage(event.id);
@@ -132,7 +132,7 @@ const image: Handler = async (
             responseType: "arraybuffer",
           })
           .then((response: any) => {
-            console.log("cloudinary ping - ai");
+            //console.log("cloudinary ping - ai");
           })
           .catch((e: any) => console.error("cloudinary ping error - ai", e));
 
@@ -172,7 +172,7 @@ const image: Handler = async (
       }
     }
 
-    console.log("ChatGPT ask reply:", result.answerType, result.text);
+    //console.log("ChatGPT ask reply:", result.answerType, result.text);
     await sleep(1000);
     //}
 

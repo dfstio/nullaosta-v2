@@ -35,50 +35,39 @@ export default class Users extends Table<UserData> {
     );
   }
 
-  private getExpAttrValue(
-    shortName: string,
-    answer: string,
-    num: number
-  ): object {
-    return JSON.parse(`{":ans" : ${num},"${shortName}" : "${answer}"}`);
-  }
-
-  public async updateAccount(id: string, account: AccountData): Promise<void> {
-    await this.updateData(
-      { id: id },
-      {
-        "#A": "account",
-      },
-      { ":acc": account },
-      `set #A = :acc`
-    );
-  }
-
   public async updateUsage(id: string, usage: AIUsage): Promise<void> {
+    const lastSeen = Date.now();
     await this.updateData(
       { id: id },
       {
         "#P": "prompt_tokens",
         "#C": "completion_tokens",
         "#T": "total_tokens",
+        "#L": "lastSeen",
+        "#D": "lastSeenDate",
       },
       {
         ":p": usage.prompt_tokens,
         ":c": usage.completion_tokens,
         ":t": usage.total_tokens,
+        ":l": lastSeen,
+        ":d": new Date(lastSeen).toISOString(),
       },
-      `ADD #P :p, #C :c, #T :t`
+      `ADD #P :p, #C :c, #T :t SET #L = :l, #D = :d`
     );
   }
 
   public async updateImageUsage(id: string): Promise<void> {
+    const lastSeen = Date.now();
     await this.updateData(
       { id: id },
       {
         "#I": "images_created",
+        "#L": "lastSeen",
+        "#D": "lastSeenDate",
       },
-      { ":i": 1 },
-      `ADD #I :i`
+      { ":i": 1, ":l": lastSeen, ":d": new Date(lastSeen).toISOString() },
+      `ADD #I :i SET #L = :l, #D = :d`
     );
   }
 }
