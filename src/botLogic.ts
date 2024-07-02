@@ -114,7 +114,7 @@ export default class BotLogic {
   }
 
   public async handleMessage(body: any): Promise<void> {
-    console.log("handleMessage", body);
+    //console.log("handleMessage", body);
 
     if (body.update?.pre_checkout_query) {
       console.log("pre_checkout_query", body);

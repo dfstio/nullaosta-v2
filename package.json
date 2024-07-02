@@ -1,11 +1,11 @@
 {
   "name": "nullaosta",
   "description": "nullaosta telegram bot",
+  "author": "DFST",
   "keywords": [
     "bot"
   ],
   "version": "2.0.0",
-  "author": "dfst.io",
   "license": "Apache-2.0",
   "scripts": {
     "deploy": "serverless deploy --aws-profile nullaosta",
